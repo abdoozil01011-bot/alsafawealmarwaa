@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="لحوم الصفا والمروه - لحوم بلدية طازجة في 6 أكتوبر">
+<title>لحوم الصفا والمروه | متجر اللحوم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="container nav">
+    <a class="brand" href="#home">
+      <img src="assets/logo.jpeg" alt="شعار لحوم الصفا والمروه">
+      <div><strong>لحوم الصفا والمروه</strong><span>لحوم بلدية 100%</span></div>
+    </a>
+    <nav>
+      <a href="#home">الرئيسية</a>
+      <a href="#products">الأصناف</a>
+      <a href="#about">عن المحل</a>
+      <a href="#contact">الموقع والتواصل</a>
+    </nav>
+    <button class="cart-btn" onclick="openCart()">🛒 السلة <b id="cartCount">0</b></button>
+  </div>
+</header>
+
+<main id="home">
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">🥩 طزاجة وجودة تستحق الثقة</span>
+      <h1> لحوم الصفا... <span>و المروه</span></h1>
+      <p>لحوم بلدية طازجة، تقطيع حسب طلبك، وتجهيز بعناية من <b>لحوم الصفا والمروه</b>.</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#products">شوف الأصناف</a>
+        <a class="btn outline" href="https://maps.app.goo.gl/TrRQ7VoFdSYadTNc6?g_st=ic" target="_blank" rel="noopener">📍 موقع المحل</a>
+      </div>
+      <div class="features">
+        <div><b>100%</b><span>لحوم بلدي</span></div>
+        <div><b>✓</b><span>جودة مضمونة</span></div>
+        <div><b>🔪</b><span>تقطيع حسب الطلب</span></div>
+        <div><b>🚚</b><span>توصيل سريع</span></div>
+      </div>
+    </div>
+    <div class="hero-logo-wrap">
+      <div class="glow"></div>
+      <img src="assets/logo.jpeg" class="hero-logo" alt="لحوم الصفا والمروه">
+    </div>
+  </div>
+</section>
+
+<section id="products" class="section products-section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">اختار اللي يناسبك</span>
+        <h2>أصنافنا</h2>
+      </div>
+      <p>حدد الكمية بالكيلو، والسلة هتحسب السعر تلقائيًا.</p>
+    </div>
+
+    <div class="shop-tools">
+      <div class="search-box">
+        <span>🔎</span>
+        <input id="searchInput" type="search" placeholder="ابحث عن صنف..." oninput="filterProducts()">
+      </div>
+      <div class="categories" id="categories">
+        <button class="category active" data-category="all" onclick="setCategory('all',this)">الكل</button>
+        <button class="category" data-category="لحوم" onclick="setCategory('لحوم',this)">🥩 لحوم</button>
+        <button class="category" data-category="مشويات" onclick="setCategory('مشويات',this)">🔥 مشويات</button>
+        <button class="category" data-category="أحشاء" onclick="setCategory('أحشاء',this)">🫀 أحشاء</button>
+        <button class="category" data-category="عكاوي" onclick="setCategory('عكاوي',this)">🍖 عكاوي</button>
+      </div>
+    </div>
+
+    <div id="productsGrid" class="products-grid"></div>
+    <div id="noResults" class="no-results" hidden>مفيش أصناف مطابقة للبحث 😔</div>
+  </div>
+</section>
+
+<section id="about" class="about section">
+  <div class="container about-grid">
+    <div class="about-card"><img src="assets/logo.jpeg" alt="شعار المحل"></div>
+    <div>
+      <span class="eyebrow">لحوم الصفا والمروه</span>
+      <h2>جودة تفرق في كل لقمة</h2>
+      <p>بنقدم لحوم بلدية طازجة بتقطيع وتجهيز حسب طلبك، مع اهتمام بالجودة والنظافة وسرعة تجهيز الطلبات.</p>
+      <div class="checks">
+        <div>✓ لحوم بلدية مختارة</div>
+        <div>✓ تجهيز وتقطيع حسب الطلب</div>
+        <div>✓ اطلب بالكمية اللي تناسبك</div>
+        <div>✓ خدمة طلب مباشرة على واتساب</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="contact section">
+  <div class="container">
+    <div class="contact-box">
+      <div>
+        <span class="eyebrow">📍 زورنا أو اطلب دليفري</span>
+        <h2>لحومك جاهزة على طلبك 🥩</h2>
+        <p><b>العنوان:</b> 6 أكتوبر - الحي السابع - المجاورة الثالثة - مسجد عثمان بن عفان</p>
+        <a class="map-btn" href="https://maps.app.goo.gl/TrRQ7VoFdSYadTNc6?g_st=ic" target="_blank" rel="noopener">📍 افتح موقع المحل على الخريطة</a>
+      </div>
+      <div class="contact-buttons">
+        <a href="tel:01113933328">📞 01113933328</a>
+        <a href="tel:01118669880">📞 01118669880</a>
+        <a href="https://wa.me/201113933328" target="_blank" rel="noopener">💬 واتساب</a>
+      </div>
+    </div>
+    <div class="socials">
+      <a href="https://www.facebook.com/search/pages?q=لحوم%20الصفا%20والمروه" target="_blank" rel="noopener">ⓕ فيسبوك: لحوم الصفا و المروه</a>
+      <a href="https://www.tiktok.com/search?q=لحوم%20الصفا%20والمروه" target="_blank" rel="noopener">♪ تيك توك: لحوم الصفا و المروه</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container footer-inner">
+    <img src="assets/logo.jpeg" alt="شعار">
+    <span>© 2026 لحوم الصفا والمروه - جميع الحقوق محفوظة</span>
+  </div>
+</footer>
+
+<!-- أزرار ثابتة -->
+<div class="floating-actions">
+  <a class="float whatsapp-float" href="https://wa.me/201113933328" target="_blank" rel="noopener" aria-label="واتساب">💬</a>
+  <a class="float call-float" href="tel:01113933328" aria-label="اتصال">📞</a>
+  <button class="float cart-float" onclick="openCart()" aria-label="السلة">🛒<b id="floatingCartCount">0</b></button>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<aside class="cart" id="cart">
+  <div class="cart-head">
+    <div>
+      <h2>🛒 سلة الطلب</h2>
+      <small>الأسعار محسوبة على أساس الكيلو</small>
+    </div>
+    <button onclick="closeCart()">×</button>
+  </div>
+  <div id="cartItems" class="cart-items"></div>
+  <div class="cart-foot">
+    <div class="cart-summary">
+      <span>إجمالي الكمية</span><b id="totalWeight">0 جم</b>
+    </div>
+    <div class="cart-summary total-line">
+      <span>الإجمالي</span><b id="cartTotal">0 جنيه</b>
+    </div>
+    <div class="customer-fields">
+      <label>الاسم بالكامل<input id="customerName" placeholder="اكتب اسمك"></label>
+      <label>العنوان بالتفصيل<input id="customerAddress" placeholder="المنطقة، الشارع، رقم العقار"></label>
+      <label>رقم التواصل<input id="customerPhone" type="tel" inputmode="tel" placeholder="01xxxxxxxxx"></label>
+    </div>
+    <button class="whatsapp" onclick="sendWhatsApp()">💬 إرسال الطلب على واتساب</button>
+  </div>
+</aside>
+
+<script>
+const products = [
+  {name:"كندوز رول", price:490, category:"لحوم", desc:"تقطيع رول بعناية لنتيجة مميزة على الشواية", img:"kandouz_roll.jpeg"},
+  {name:"موزة كندوز", price:490, category:"لحوم", desc:"قطعة مميزة غنية بالنكهة ومناسبة لكل الأطباق", img:"mozah_kandouz.jpeg"},
+  {name:"كندوز ريش", price:400, category:"لحوم", desc:"طازجة وشهية بجودة مضمونة", img:"kandouz_ribs.jpeg"},
+  {name:"كندوز بيف", price:490, category:"لحوم", desc:"طرية وشهية وجاهزة للطبخ", img:"kandouz_beef.jpeg"},
+  {name:"لحمة كندوز أحمر وملبس", price:450, category:"لحوم", desc:"لحوم بلدي طازجة وتقطيع حسب الطلب", img:"lahmet_kandouz_ahmar.jpeg"},
+  {name:"ستيك بلدي", price:490, category:"مشويات", desc:"لحم فاخر بطعم أصيل، مناسب للشوي والقلي", img:"steak_balady.jpeg"},
+  {name:"شاورما بلدي", price:490, category:"مشويات", desc:"شرائح كندوز بلدي متقطعة باحتراف", img:"shawerma_balady.jpeg"},
+  {name:"روست بيف بلدي", price:490, category:"مشويات", desc:"قطعة مميزة للعزومات والمناسبات", img:"roast_beef_balady.jpeg"},
+  {name:"ريبي آي", price:490, category:"مشويات", desc:"قطعة غنية وفاخرة لعشاق الستيك", img:"ribeye.jpeg"},
+  {name:"مخاصي", price:350, category:"أحشاء", desc:"طازجة ومجهزة بعناية وتقطيع حسب الطلب", img:"makhasi.jpeg"},
+  {name:"عكاوي كندوز", price:400, category:"عكاوي", desc:"مناسبة للطواجن والأكلات البلدي الأصيلة", img:"akawy_kandouz.jpeg"},
+  {name:"حلويات", price:150, category:"أحشاء", desc:"تشكيلة حلويات طازجة مجهزة بعناية", img:"helwiyat.jpeg"},
+  {name:"طحال", price:150, category:"أحشاء", desc:"تقطيع وتجهيز حسب طلبك", img:"tahal.jpeg"},
+  {name:"فشة", price:150, category:"أحشاء", desc:"طازجة ومجهزة للتقديم والطبخ حسب الطلب", img:"masha.jpeg"},
+  {name:"كلاوي", price:490, category:"أحشاء", desc:"طازجة وتقطيع مثالي حسب الطلب", img:"kalawy.jpeg"},
+  {name:"كبدة", price:490, category:"أحشاء", desc:"طعم بيتي وجودة تعتمد عليها", img:"kebda.jpeg"},
+  {name:"طرب شوي", price:370, category:"مشويات", desc:"جاهز للشوي بطعم بيتي وتجهيز بعناية", img:"torab_shawy.jpeg"},
+  {name:"بفتيك", price:480, category:"مشويات", desc:"شرائح لحم متقطعة بعناية ومناسبة للقلي والشوي", img:"bifteck.jpeg"}
+];
+
+let activeCategory = "all";
+let cart = JSON.parse(localStorage.getItem("safaCartV2") || "{}");
+
+function money(n){ return new Intl.NumberFormat('ar-EG').format(Math.round(n)); }
+function kgText(kg){
+  if(kg >= 1) return `${Number(kg.toFixed(2))} كيلو`;
+  return `${Math.round(kg*1000)} جم`;
+}
+function weightOptions(selected=0.5){
+  return [0.25,0.5,0.75,1,1.5,2].map(v=>`<option value="${v}" ${v===selected?'selected':''}>${v<1 ? v*1000+' جم' : v+' كيلو'}</option>`).join('');
+}
+function renderProducts(){
+  const grid=document.getElementById('productsGrid');
+  const search=(document.getElementById('searchInput').value||'').trim().toLowerCase();
+  const filtered=products.map((p,i)=>({p,i})).filter(({p})=>{
+    const catOk=activeCategory==='all'||p.category===activeCategory;
+    const searchOk=!search || `${p.name} ${p.desc} ${p.category}`.toLowerCase().includes(search);
+    return catOk&&searchOk;
+  });
+  grid.innerHTML=filtered.map(({p,i})=>`
+    <article class="product-card">
+      <div class="product-img"><img src="assets/${p.img}" alt="${p.name}" loading="lazy"></div>
+      <div class="product-body">
+        <div class="product-top"><span class="tag">${p.category}</span><span class="price">${money(p.price)} ج/كجم</span></div>
+        <h3>${p.name}</h3>
+        <p>${p.desc}</p>
+        <label class="weight-picker">الكمية
+          <select id="weight-${i}">${weightOptions()}</select>
+        </label>
+        <div class="product-actions">
+          <button class="add" onclick="addSelectedToCart(${i})">+ أضف للسلة</button>
+          <button class="order-one" onclick="quickOrder(${i})">طلب مباشر</button>
+        </div>
+      </div>
+    </article>`).join('');
+  document.getElementById('noResults').hidden=filtered.length!==0;
+}
+function filterProducts(){renderProducts();}
+function setCategory(cat,btn){
+  activeCategory=cat;
+  document.querySelectorAll('.category').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProducts();
+}
+function addSelectedToCart(i){
+  const select=document.getElementById(`weight-${i}`);
+  const kg=parseFloat(select.value)||0.5;
+  cart[i]=Number(((cart[i]||0)+kg).toFixed(2));
+  save();
+  openCart();
+}
+function addWeight(i,amount){
+  cart[i]=Number(((cart[i]||0)+amount).toFixed(2));
+  if(cart[i]<=0) delete cart[i];
+  save();
+}
+function save(){localStorage.setItem('safaCartV2',JSON.stringify(cart));renderCart();}
+function renderCart(){
+  const box=document.getElementById('cartItems');
+  let totalKg=0,totalPrice=0;
+  const keys=Object.keys(cart).filter(i=>cart[i]>0);
+  let html='';
+  keys.forEach(i=>{
+    const q=Number(cart[i]); const p=products[i];
+    totalKg+=q; totalPrice+=q*p.price;
+    html+=`<div class="cart-row">
+      <img src="assets/${p.img}" alt="${p.name}">
+      <div class="cart-product-info"><b>${p.name}</b><small>${money(p.price)} ج/كجم · ${money(q*p.price)} جنيه</small></div>
+      <div class="qty"><button onclick="addWeight(${i},-0.25)">−</button><span>${kgText(q)}</span><button onclick="addWeight(${i},0.25)">+</button></div>
+    </div>`;
+  });
+  box.innerHTML=html||'<div class="empty">السلة فاضية 😄<br>اختار الأصناف اللي عايزها.</div>';
+  document.getElementById('cartCount').textContent=keys.length;
+  document.getElementById('floatingCartCount').textContent=keys.length;
+  document.getElementById('totalWeight').textContent=kgText(totalKg);
+  document.getElementById('cartTotal').textContent=`${money(totalPrice)} جنيه`;
+}
+function openCart(){document.getElementById('cart').classList.add('open');document.getElementById('overlay').classList.add('show');document.body.classList.add('cart-open');}
+function closeCart(){document.getElementById('cart').classList.remove('open');document.getElementById('overlay').classList.remove('show');document.body.classList.remove('cart-open');}
+function quickOrder(i){
+  const select=document.getElementById(`weight-${i}`);
+  const kg=select ? parseFloat(select.value)||0.5 : 0.5;
+  cart={}; cart[i]=kg; save(); openCart();
+}
+function sendWhatsApp(){
+  const name=document.getElementById('customerName').value.trim();
+  const address=document.getElementById('customerAddress').value.trim();
+  const phone=document.getElementById('customerPhone').value.trim();
+  const keys=Object.keys(cart).filter(i=>cart[i]>0);
+  if(!keys.length){alert('السلة فاضية، اختار صنف الأول.');return;}
+  if(!name||!address||!phone){alert('من فضلك اكتب الاسم والعنوان ورقم التواصل قبل إرسال الطلب.');return;}
+  const phoneDigits=phone.replace(/\D/g,'');
+  if(phoneDigits.length<10){alert('اكتب رقم تواصل صحيح.');return;}
+  let total=0,totalKg=0;
+  const orderLines=keys.map(i=>{
+    const q=Number(cart[i]); const p=products[i]; const line=q*p.price; total+=line; totalKg+=q;
+    return `• ${p.name} — ${kgText(q)} — ${money(line)} جنيه`;
+  });
+  const msg=[
+    '🥩 *طلب جديد من موقع لحوم الصفا والمروه*',
+    '',
+    ...orderLines,
+    '',
+    `📦 إجمالي الكمية: ${kgText(totalKg)}`,
+    `💰 إجمالي الطلب: ${money(total)} جنيه`,
+    '',
+    `👤 الاسم: ${name}`,
+    `📍 العنوان: ${address}`,
+    `📱 رقم التواصل: ${phone}`,
+    '',
+    'من فضلكم تأكيد الطلب والتوصيل.'
+  ].join('\n');
+  window.open(`https://wa.me/201113933328?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+renderProducts();
+renderCart();
+</script>
+</body>
+</html>
