@@ -142,6 +142,20 @@ async function loadProducts(){
   if(error){msg($('globalMsg'),'تعذر تحميل الأصناف: '+error.message,'error');return;}
   products=data||[]; renderTable(); msg($('globalMsg'),`تم تحميل ${products.length} صنف.`,'success');
 }
+$('productsTable').addEventListener('click', async e=>{
+  const editBtn=e.target.closest('.edit-btn');
+  if(editBtn){
+    e.preventDefault();
+    const p=products.find(x=>String(x.id)===String(editBtn.dataset.id));
+    if(p) openModal(p);
+    return;
+  }
+  const deleteBtn=e.target.closest('.delete-btn');
+  if(deleteBtn){
+    e.preventDefault();
+    await deleteProduct(deleteBtn.dataset.id);
+  }
+});
 function renderTable(){
   $('productsTable').innerHTML=products.map(p=>`<tr>
     <td><img class="thumb" src="${esc(p.image_url||'assets/logo.jpeg')}" onerror="this.src='assets/logo.jpeg'"></td>
@@ -150,7 +164,7 @@ function renderTable(){
     <td>${esc(p.category||'')}</td>
     <td><span class="status ${p.active?'on':'off'}">${p.active?'ظاهر':'مخفي'}</span></td>
     <td>${Number(p.sort_order??100)}</td>
-    <td class="actions"><button onclick="editProduct('${p.id}')">تعديل</button><button class="danger" onclick="deleteProduct('${p.id}')">حذف</button></td>
+    <td class="actions"><button type="button" class="edit-btn" data-id="${esc(p.id)}">تعديل</button><button type="button" class="danger delete-btn" data-id="${esc(p.id)}">حذف</button></td>
   </tr>`).join('') || `<tr><td colspan="7" class="empty-table">مفيش أصناف في قاعدة البيانات. اضغط «استيراد الأصناف الحالية».</td></tr>`;
 }
 
