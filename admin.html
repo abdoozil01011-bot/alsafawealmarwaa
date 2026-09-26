@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة إدارة - لحوم الصفا والمروه</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+</head>
+<body>
+<div class="admin-shell">
+  <header class="topbar">
+    <div>
+      <div class="brand">🥩 لحوم الصفا والمروه</div>
+      <small>لوحة إدارة الأصناف والأسعار</small>
+    </div>
+    <div class="top-actions">
+      <a href="index.html" target="_blank">فتح الموقع ↗</a>
+      <button id="logoutBtn" class="ghost" hidden>تسجيل الخروج</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="loginView" class="card login-card">
+      <h1>تسجيل دخول الإدارة</h1>
+      <p>استخدم الإيميل والباسورد اللي عملتهم في Supabase Authentication.</p>
+      <form id="loginForm">
+        <label>الإيميل<input id="loginEmail" type="email" required autocomplete="username" placeholder="admin@example.com"></label>
+        <label>كلمة المرور<input id="loginPassword" type="password" required autocomplete="current-password" placeholder="••••••••"></label>
+        <button class="primary" type="submit">دخول</button>
+        <div id="loginMsg" class="msg"></div>
+      </form>
+    </section>
+
+    <section id="dashboardView" hidden>
+      <div class="dashboard-head">
+        <div>
+          <h1>الأصناف</h1>
+          <p>أي تعديل هنا بيظهر على الموقع بعد الحفظ مباشرة.</p>
+        </div>
+        <div class="head-actions">
+          <button id="seedBtn" class="secondary">استيراد الأصناف الحالية</button>
+          <button id="newBtn" class="primary">+ إضافة صنف</button>
+        </div>
+      </div>
+
+      <div id="globalMsg" class="msg"></div>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>الصورة</th><th>الصنف</th><th>السعر</th><th>القسم</th><th>الحالة</th><th>الترتيب</th><th>إجراء</th></tr></thead>
+            <tbody id="productsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="productModal" hidden>
+  <div class="modal-box">
+    <div class="modal-head"><h2 id="modalTitle">إضافة صنف</h2><button id="closeModal" class="close">×</button></div>
+    <form id="productForm">
+      <input type="hidden" id="productId">
+      <div class="form-grid">
+        <label>اسم الصنف<input id="productName" required></label>
+        <label>السعر / كجم<input id="productPrice" type="number" min="0" step="1" required></label>
+        <label>القسم
+          <select id="productCategory">
+            <option value="لحوم">🥩 لحوم</option>
+            <option value="مشويات">🔥 مشويات</option>
+            <option value="أحشاء">🫀 أحشاء</option>
+            <option value="عكاوي">🍖 عكاوي</option>
+          </select>
+        </label>
+        <label>ترتيب الظهور<input id="productOrder" type="number" min="0" step="1" value="100"></label>
+      </div>
+      <label>الوصف<textarea id="productDescription" rows="3" placeholder="وصف مختصر للصنف"></textarea></label>
+      <label>صورة الصنف<input id="productImage" type="file" accept="image/*"><small>اختياري. لو لم ترفع صورة، هنستخدم الصورة الحالية.</small></label>
+      <div id="currentImage" class="current-image"></div>
+      <label class="switch-row"><input id="productActive" type="checkbox" checked><span>الصنف ظاهر على الموقع</span></label>
+      <div class="modal-actions"><button type="button" id="cancelBtn" class="secondary">إلغاء</button><button type="submit" class="primary" id="saveBtn">حفظ</button></div>
+      <div id="formMsg" class="msg"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+const fallbackProducts = [
+  {name:"كندوز رول",price:490,category:"لحوم",description:"تقطيع رول بعناية لنتيجة مميزة على الشواية",image_url:"assets/kandouz_roll.jpeg",sort_order:1},
+  {name:"موزة كندوز",price:490,category:"لحوم",description:"قطعة مميزة غنية بالنكهة ومناسبة لكل الأطباق",image_url:"assets/mozah_kandouz.jpeg",sort_order:2},
+  {name:"كندوز ريش",price:400,category:"لحوم",description:"طازجة وشهية بجودة مضمونة",image_url:"assets/kandouz_ribs.jpeg",sort_order:3},
+  {name:"كندوز بيف",price:490,category:"لحوم",description:"طرية وشهية وجاهزة للطبخ",image_url:"assets/kandouz_beef.jpeg",sort_order:4},
+  {name:"لحمة كندوز أحمر وملبس",price:450,category:"لحوم",description:"لحوم بلدي طازجة وتقطيع حسب الطلب",image_url:"assets/lahmet_kandouz_ahmar.jpeg",sort_order:5},
+  {name:"ستيك بلدي",price:490,category:"مشويات",description:"لحم فاخر بطعم أصيل، مناسب للشوي والقلي",image_url:"assets/steak_balady.jpeg",sort_order:6},
+  {name:"شاورما بلدي",price:490,category:"مشويات",description:"شرائح كندوز بلدي متقطعة باحتراف",image_url:"assets/shawerma_balady.jpeg",sort_order:7},
+  {name:"روست بيف بلدي",price:490,category:"مشويات",description:"قطعة مميزة للعزومات والمناسبات",image_url:"assets/roast_beef_balady.jpeg",sort_order:8},
+  {name:"ريبي آي",price:490,category:"مشويات",description:"قطعة غنية وفاخرة لعشاق الستيك",image_url:"assets/ribeye.jpeg",sort_order:9},
+  {name:"مخاصي",price:350,category:"أحشاء",description:"طازجة ومجهزة بعناية وتقطيع حسب الطلب",image_url:"assets/makhasi.jpeg",sort_order:10},
+  {name:"عكاوي كندوز",price:400,category:"عكاوي",description:"مناسبة للطواجن والأكلات البلدي الأصيلة",image_url:"assets/akawy_kandouz.jpeg",sort_order:11},
+  {name:"حلويات",price:150,category:"أحشاء",description:"تشكيلة حلويات طازجة مجهزة بعناية",image_url:"assets/helwiyat.jpeg",sort_order:12},
+  {name:"طحال",price:150,category:"أحشاء",description:"تقطيع وتجهيز حسب طلبك",image_url:"assets/tahal.jpeg",sort_order:13},
+  {name:"فشة",price:150,category:"أحشاء",description:"طازجة ومجهزة للتقديم والطبخ حسب الطلب",image_url:"assets/masha.jpeg",sort_order:14},
+  {name:"كلاوي",price:490,category:"أحشاء",description:"طازجة وتقطيع مثالي حسب الطلب",image_url:"assets/kalawy.jpeg",sort_order:15},
+  {name:"كبدة",price:490,category:"أحشاء",description:"طعم بيتي وجودة تعتمد عليها",image_url:"assets/kebda.jpeg",sort_order:16},
+  {name:"طرب شوي",price:370,category:"مشويات",description:"جاهز للشوي بطعم بيتي وتجهيز بعناية",image_url:"assets/torab_shawy.jpeg",sort_order:17},
+  {name:"بفتيك",price:480,category:"مشويات",description:"شرائح لحم متقطعة بعناية ومناسبة للقلي والشوي",image_url:"assets/bifteck.jpeg",sort_order:18},
+  {name:"كفتة أرز",price:300,category:"مشويات",description:"كفتة أرز طازجة ومجهزة بعناية",image_url:"assets/kofta_roz.jpeg",sort_order:19},
+  {name:"كفتة شوي",price:370,category:"مشويات",description:"جاهزة للشوي بطعم مميز وتجهيز بعناية",image_url:"assets/kofta_shawy.jpeg",sort_order:20},
+  {name:"طرب تركي",price:370,category:"مشويات",description:"طرب تركي طازج ومجهز للشوي",image_url:"assets/tarab_turki.jpeg",sort_order:21},
+  {name:"مبار محشي",price:250,category:"أحشاء",description:"مبار محشي طازج ومجهز بعناية",image_url:"assets/mombar_mahshi.jpeg",sort_order:22}
+];
+
+let products=[];
+let editingId=null;
+const $=id=>document.getElementById(id);
+function msg(el,text,type=''){el.textContent=text;el.className='msg '+type;}
+function esc(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+
+async function init(){
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  if(session) showDashboard(); else showLogin();
+  supabaseClient.auth.onAuthStateChange((_event,session)=>{if(session) showDashboard(); else showLogin();});
+}
+function showLogin(){ $('loginView').hidden=false; $('dashboardView').hidden=true; $('logoutBtn').hidden=true; }
+async function showDashboard(){ $('loginView').hidden=true; $('dashboardView').hidden=false; $('logoutBtn').hidden=false; await loadProducts(); }
+
+$('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault(); msg($('loginMsg'),'جاري تسجيل الدخول...');
+  const {error}=await supabaseClient.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});
+  if(error) msg($('loginMsg'),'بيانات الدخول غير صحيحة أو حدث خطأ: '+error.message,'error'); else msg($('loginMsg'),'تم الدخول بنجاح','success');
+});
+$('logoutBtn').onclick=async()=>{await supabaseClient.auth.signOut();};
+
+async function loadProducts(){
+  msg($('globalMsg'),'جاري تحميل الأصناف...');
+  const {data,error}=await supabaseClient.from('products').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true});
+  if(error){msg($('globalMsg'),'تعذر تحميل الأصناف: '+error.message,'error');return;}
+  products=data||[]; renderTable(); msg($('globalMsg'),`تم تحميل ${products.length} صنف.`,'success');
+}
+function renderTable(){
+  $('productsTable').innerHTML=products.map(p=>`<tr>
+    <td><img class="thumb" src="${esc(p.image_url||'assets/logo.jpeg')}" onerror="this.src='assets/logo.jpeg'"></td>
+    <td><strong>${esc(p.name)}</strong><small>${esc(p.description||'')}</small></td>
+    <td>${Number(p.price||0).toLocaleString('ar-EG')} ج</td>
+    <td>${esc(p.category||'')}</td>
+    <td><span class="status ${p.active?'on':'off'}">${p.active?'ظاهر':'مخفي'}</span></td>
+    <td>${Number(p.sort_order??100)}</td>
+    <td class="actions"><button onclick="editProduct('${p.id}')">تعديل</button><button class="danger" onclick="deleteProduct('${p.id}')">حذف</button></td>
+  </tr>`).join('') || `<tr><td colspan="7" class="empty-table">مفيش أصناف في قاعدة البيانات. اضغط «استيراد الأصناف الحالية».</td></tr>`;
+}
+
+$('newBtn').onclick=()=>openModal();
+$('closeModal').onclick=$('cancelBtn').onclick=()=>closeModal();
+$('productModal').addEventListener('click',e=>{if(e.target.id==='productModal')closeModal();});
+function openModal(p=null){
+  editingId=p?.id||null;
+  $('modalTitle').textContent=editingId?'تعديل الصنف':'إضافة صنف';
+  $('productId').value=editingId||'';
+  $('productName').value=p?.name||'';
+  $('productPrice').value=p?.price??'';
+  $('productCategory').value=p?.category||'لحوم';
+  $('productOrder').value=p?.sort_order??100;
+  $('productDescription').value=p?.description||'';
+  $('productActive').checked=p?.active!==false;
+  $('productImage').value='';
+  $('currentImage').innerHTML=p?.image_url?`<img src="${esc(p.image_url)}" alt="الصورة الحالية"> <span>الصورة الحالية</span>`:'';
+  msg($('formMsg'),'');
+  $('productModal').hidden=false;
+}
+function closeModal(){ $('productModal').hidden=true; editingId=null; }
+window.editProduct=id=>{const p=products.find(x=>x.id===id);if(p)openModal(p);};
+
+async function uploadImage(file){
+  const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+  const path=`products/${crypto.randomUUID()}.${ext}`;
+  const {error}=await supabaseClient.storage.from('product-images').upload(path,file,{upsert:false,contentType:file.type||'image/jpeg'});
+  if(error) throw error;
+  const {data}=supabaseClient.storage.from('product-images').getPublicUrl(path);
+  return data.publicUrl;
+}
+
+$('productForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const btn=$('saveBtn'); btn.disabled=true; msg($('formMsg'),'جاري الحفظ...');
+  try{
+    let imageUrl=null;
+    const file=$('productImage').files[0];
+    if(file) imageUrl=await uploadImage(file);
+    const payload={name:$('productName').value.trim(),price:Number($('productPrice').value),category:$('productCategory').value,description:$('productDescription').value.trim(),sort_order:Number($('productOrder').value)||100,active:$('productActive').checked};
+    if(!payload.name || !Number.isFinite(payload.price)) throw new Error('اكتب اسم وسعر صحيحين.');
+    if(imageUrl) payload.image_url=imageUrl;
+    if(editingId){
+      const {error}=await supabaseClient.from('products').update(payload).eq('id',editingId);
+      if(error) throw error;
+      msg($('formMsg'),'تم تعديل الصنف بنجاح','success');
+    }else{
+      if(!payload.image_url) payload.image_url='assets/logo.jpeg';
+      const {error}=await supabaseClient.from('products').insert(payload);
+      if(error) throw error;
+      msg($('formMsg'),'تمت إضافة الصنف بنجاح','success');
+    }
+    await loadProducts(); setTimeout(closeModal,500);
+  }catch(err){msg($('formMsg'),'حصل خطأ: '+err.message,'error');}
+  finally{btn.disabled=false;}
+});
+
+window.deleteProduct=async id=>{
+  const p=products.find(x=>x.id===id); if(!p)return;
+  if(!confirm(`متأكد إنك عايز تحذف «${p.name}»؟`))return;
+  const {error}=await supabaseClient.from('products').delete().eq('id',id);
+  if(error){msg($('globalMsg'),'تعذر الحذف: '+error.message,'error');return;}
+  await loadProducts();
+};
+
+$('seedBtn').onclick=async()=>{
+  if(!confirm('هيتم إضافة الأصناف الحالية لقاعدة البيانات. لو الصنف موجود بنفس الاسم مش هيتكرر. نكمل؟'))return;
+  const {data:existing,error:getErr}=await supabaseClient.from('products').select('name');
+  if(getErr){msg($('globalMsg'),'تعذر قراءة الأصناف: '+getErr.message,'error');return;}
+  const names=new Set((existing||[]).map(x=>x.name));
+  const rows=fallbackProducts.filter(p=>!names.has(p.name)).map(p=>({...p,active:true}));
+  if(!rows.length){msg($('globalMsg'),'كل الأصناف الحالية موجودة بالفعل.','success');return;}
+  const {error}=await supabaseClient.from('products').insert(rows);
+  if(error){msg($('globalMsg'),'فشل الاستيراد: '+error.message,'error');return;}
+  await loadProducts(); msg($('globalMsg'),`تم استيراد ${rows.length} صنف بنجاح.`,'success');
+};
+
+init();
+</script>
+</body>
+</html>
