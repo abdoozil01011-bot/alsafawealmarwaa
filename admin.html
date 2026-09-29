@@ -192,9 +192,9 @@ window.editProduct=id=>{const p=products.find(x=>x.id===id);if(p)openModal(p);};
 async function uploadImage(file){
   const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
   const path=`products/${crypto.randomUUID()}.${ext}`;
-  const {error}=await supabaseClient.storage.from('product-images').upload(path,file,{upsert:false,contentType:file.type||'image/jpeg'});
+  const {error}=await supabaseClient.storage.from('products-images').upload(path,file,{upsert:false,contentType:file.type||'image/jpeg'});
   if(error) throw error;
-  const {data}=supabaseClient.storage.from('product-images').getPublicUrl(path);
+  const {data}=supabaseClient.storage.from('products-images').getPublicUrl(path);
   return data.publicUrl;
 }
 
