@@ -189,12 +189,22 @@ function openModal(p=null){
 function closeModal(){ $('productModal').hidden=true; editingId=null; }
 window.editProduct=id=>{const p=products.find(x=>x.id===id);if(p)openModal(p);};
 
+const STORAGE_BUCKET = 'products-images';
+
 async function uploadImage(file){
   const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
   const path=`products/${crypto.randomUUID()}.${ext}`;
-  const {error}=await supabaseClient.storage.from('products-images').upload(path,file,{upsert:false,contentType:file.type||'image/jpeg'});
-  if(error) throw error;
-  const {data}=supabaseClient.storage.from('products-images').getPublicUrl(path);
+  const {error}=await supabaseClient.storage.from(STORAGE_BUCKET).upload(path,file,{upsert:false,contentType:file.type||'image/jpeg'});
+  if(error){
+    if(String(error.message||'').toLowerCase().includes('bucket not found')){
+      throw new Error('Bucket products-images غير موجود في نفس مشروع Supabase المتصل بالموقع. افتح Storage وتأكد أن الاسم products-images.');
+    }
+    if(String(error.message||'').toLowerCase().includes('row-level security') || String(error.message||'').toLowerCase().includes('not authorized') || error.statusCode===403){
+      throw new Error('رفع الصورة مرفوض بسبب صلاحيات Storage. شغّل ملف STORAGE_POLICIES.sql في Supabase.');
+    }
+    throw error;
+  }
+  const {data}=supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(path);
   return data.publicUrl;
 }
 
@@ -223,13 +233,53 @@ $('productForm').addEventListener('submit',async e=>{
   finally{btn.disabled=false;}
 });
 
-window.deleteProduct=async id=>{
-  const p=products.find(x=>x.id===id); if(!p)return;
-  if(!confirm(`متأكد إنك عايز تحذف «${p.name}»؟`))return;
-  const {error}=await supabaseClient.from('products').delete().eq('id',id);
-  if(error){msg($('globalMsg'),'تعذر الحذف: '+error.message,'error');return;}
-  await loadProducts();
-};
+async function deleteProduct(id){
+  id=String(id ?? '').trim();
+  const p=products.find(x=>String(x.id)===id);
+  if(!p){
+    msg($('globalMsg'),'لم يتم العثور على الصنف المطلوب حذفه.','error');
+    return;
+  }
+  if(!window.confirm(`متأكد إنك عايز تحذف «${p.name}»؟`)) return;
+
+  msg($('globalMsg'),'جاري حذف الصنف...');
+  const buttons=[...document.querySelectorAll(`.delete-btn[data-id="${CSS.escape(id)}"]`)];
+  buttons.forEach(b=>b.disabled=true);
+  try{
+    const {data:deletedRows,error}=await supabaseClient
+      .from('products')
+      .delete()
+      .eq('id',id)
+      .select('id');
+
+    if(error) throw error;
+    if(!deletedRows || deletedRows.length === 0){
+      const {data:{session}} = await supabaseClient.auth.getSession();
+      if(!session){
+        throw new Error('انتهت جلسة تسجيل الدخول. اعمل تسجيل دخول للإدارة مرة تانية.');
+      }
+      throw new Error('لم يتم حذف الصنف. تأكد أن سياسة DELETE لجدول products مفعلة للمستخدم المسجل.');
+    }
+    const {data:stillThere,error:verifyError}=await supabaseClient
+      .from('products')
+      .select('id')
+      .eq('id',id)
+      .maybeSingle();
+    if(verifyError) throw verifyError;
+    if(stillThere){
+      throw new Error('الصنف لم يُحذف. تأكد من تشغيل STORAGE_POLICIES.sql في Supabase وإنشاء سياسة DELETE لجدول products.');
+    }
+    products=products.filter(x=>String(x.id)!==id);
+    renderTable();
+    msg($('globalMsg'),'تم حذف الصنف بنجاح.','success');
+  }catch(err){
+    console.error('Delete product error:',err);
+    msg($('globalMsg'),'تعذر الحذف: '+(err?.message || err),'error');
+  }finally{
+    buttons.forEach(b=>b.disabled=false);
+  }
+}
+window.deleteProduct=deleteProduct;
 
 $('seedBtn').onclick=async()=>{
   if(!confirm('هيتم إضافة الأصناف الحالية لقاعدة البيانات. لو الصنف موجود بنفس الاسم مش هيتكرر. نكمل؟'))return;
