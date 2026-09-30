@@ -200,7 +200,7 @@ function kgText(kg){
   return `${Math.round(kg*1000)} جم`;
 }
 function weightOptions(selected=0.5){
-  return [0.25,0.5,0.75,1,1.5,2].map(v=>`<option value="${v}" ${v===selected?'selected':''}>${v<1 ? v*1000+' جم' : v+' كيلو'}</option>`).join('');
+  return [1,1.5,2].map(v=>`<option value="${v}" ${v===selected?'selected':''}>${v<1 ? v*1000+' جم' : v+' كيلو'}</option>`).join('');
 }
 function productImage(p){
   return p.image_url || p.img || '';
